@@ -1,52 +1,37 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>استخراج کاربران وردپرس</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        input, button { padding: 10px; margin: 10px; }
-        #result { margin-top: 20px; }
-    </style>
+    <title>WPXtract - Extract WordPress Users</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-    <h2>استخراج کاربران وردپرس</h2>
-    <input type="text" id="siteUrl" placeholder="آدرس سایت وردپرسی">
-    <button onclick="fetchUsers()">دریافت کاربران</button>
+    <header>
+        <img src="logo.png" alt="WPXtract Logo" id="logo">
+        <h1>WPXtract</h1>
+        <div>
+            <button id="lang-toggle">🇺🇸 EN / 🇮🇷 FA</button>
+            <button id="theme-toggle">🌙</button>
+        </div>
+    </header>
     
-    <div id="result"></div>
+    <main>
+        <label for="site-url" id="url-label">Enter WordPress Site URL:</label>
+        <input type="text" id="site-url" placeholder="https://example.com">
+        <button id="extract-btn">🔍 Extract Users</button>
 
-    <script>
-        function fetchUsers() {
-            let siteUrl = document.getElementById('siteUrl').value.trim();
-            if (!siteUrl) {
-                alert("لطفاً آدرس سایت را وارد کنید!");
-                return;
-            }
+        <div id="loading" class="hidden">⏳ Loading...</div>
+        <div id="result-container"></div>
 
-            let apiUrl = `${siteUrl}/wp-json/wp/v2/users`;
+        <button id="copy-btn" class="hidden">📋 Copy to Clipboard</button>
+        <button id="download-btn" class="hidden">💾 Download JSON</button>
+    </main>
 
-            fetch(apiUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`دسترسی به کاربران ممکن نیست! (${response.status})`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    let resultDiv = document.getElementById('result');
-                    resultDiv.innerHTML = "<h3>لیست کاربران:</h3>";
-                    data.forEach(user => {
-                        resultDiv.innerHTML += `<p><strong>${user.name}</strong> - ${user.slug}</p>`;
-                    });
-                })
-                .catch(error => {
-                    document.getElementById('result').innerHTML = `<p style="color:red;">خطا: ${error.message}</p>`;
-                });
-        }
-    </script>
+    <footer>
+        <p>© 2025 WPXtract | <a href="https://github.com/your-repo">GitHub</a></p>
+    </footer>
 
+    <script src="script.js"></script>
 </body>
 </html>
