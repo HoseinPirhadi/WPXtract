@@ -1,37 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WPXtract - Extract WordPress Users</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WordPress User Extractor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div class="container">
     <header>
-        <img src="logo.png" alt="WPXtract Logo" id="logo">
-        <h1>WPXtract</h1>
-        <div>
-            <button id="lang-toggle">🇺🇸 EN / 🇮🇷 FA</button>
-            <button id="theme-toggle">🌙</button>
+      <div class="logo-container">
+        <div class="logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"></path>
+            <path d="M12 16v-4"></path>
+            <path d="M12 8h.01"></path>
+          </svg>
         </div>
+        <div class="title-container">
+          <h1 id="title">WordPress User Extractor</h1>
+          <p class="subtitle" id="subtitle">Extract user information from WordPress sites via the REST API</p>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-outline" id="toggle-theme">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+          <span id="theme-text">Dark Mode</span>
+        </button>
+        <button class="btn btn-outline" id="toggle-lang">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m5 8 6 6"></path>
+            <path d="m4 14 6-6 2-3"></path>
+            <path d="M2 5h12"></path>
+            <path d="M7 2h1"></path>
+            <path d="m22 22-5-10-5 10"></path>
+            <path d="M14 18h6"></path>
+          </svg>
+          <span id="lang-text">فارسی</span>
+        </button>
+      </div>
     </header>
-    
+
     <main>
-        <label for="site-url" id="url-label">Enter WordPress Site URL:</label>
-        <input type="text" id="site-url" placeholder="https://example.com">
-        <button id="extract-btn">🔍 Extract Users</button>
+      <div class="form-group">
+        <label for="site-url" class="form-label" id="url-label">WordPress Site URL</label>
+        <div class="input-wrapper">
+          <input type="text" id="site-url" placeholder="Enter WordPress site URL (e.g. https://example.com)">
+          <button class="btn btn-primary" id="extract-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.3-4.3"></path>
+            </svg>
+            <span>Extract Users</span>
+          </button>
+        </div>
+      </div>
 
-        <div id="loading" class="hidden">⏳ Loading...</div>
-        <div id="result-container"></div>
+      <div id="initial-state" class="empty-state">
+        <div class="empty-state-icon">👥</div>
+        <h2 class="empty-state-title" id="empty-title">Ready to Extract Users</h2>
+        <p class="empty-state-description" id="empty-description">Enter a WordPress site URL above and click "Extract Users" to fetch user information.</p>
+      </div>
 
-        <button id="copy-btn" class="hidden">📋 Copy to Clipboard</button>
-        <button id="download-btn" class="hidden">💾 Download JSON</button>
+      <div class="loader-container">
+        <div class="loader" id="loader"></div>
+      </div>
+      
+      <div class="message error-message" id="error-message"></div>
+      <div class="message no-results" id="no-results"></div>
+      
+      <div class="results" id="results"></div>
     </main>
+  </div>
 
-    <footer>
-        <p>© 2025 WPXtract | <a href="https://github.com/your-repo">GitHub</a></p>
-    </footer>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
