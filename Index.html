@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استخراج کاربران وردپرس</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        input, button { padding: 10px; margin: 10px; }
+        #result { margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <h2>استخراج کاربران وردپرس</h2>
+    <input type="text" id="siteUrl" placeholder="آدرس سایت وردپرسی">
+    <button onclick="fetchUsers()">دریافت کاربران</button>
+    
+    <div id="result"></div>
+
+    <script>
+        function fetchUsers() {
+            let siteUrl = document.getElementById('siteUrl').value.trim();
+            if (!siteUrl) {
+                alert("لطفاً آدرس سایت را وارد کنید!");
+                return;
+            }
+
+            let apiUrl = `${siteUrl}/wp-json/wp/v2/users`;
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`دسترسی به کاربران ممکن نیست! (${response.status})`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = "<h3>لیست کاربران:</h3>";
+                    data.forEach(user => {
+                        resultDiv.innerHTML += `<p><strong>${user.name}</strong> - ${user.slug}</p>`;
+                    });
+                })
+                .catch(error => {
+                    document.getElementById('result').innerHTML = `<p style="color:red;">خطا: ${error.message}</p>`;
+                });
+        }
+    </script>
+
+</body>
+</html>
