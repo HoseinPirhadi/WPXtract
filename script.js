@@ -1,278 +1,424 @@
-// DOM Elements
-const toggleThemeBtn = document.getElementById('toggle-theme');
-const toggleLangBtn = document.getElementById('toggle-lang');
-const themeText = document.getElementById('theme-text');
-const langText = document.getElementById('lang-text');
-const titleElement = document.getElementById('title');
-const subtitleElement = document.getElementById('subtitle');
-const urlLabelElement = document.getElementById('url-label');
-const emptyTitleElement = document.getElementById('empty-title');
-const emptyDescriptionElement = document.getElementById('empty-description');
-const siteUrlInput = document.getElementById('site-url');
-const extractBtn = document.getElementById('extract-btn');
-const initialState = document.getElementById('initial-state');
-const loader = document.getElementById('loader');
-const loaderContainer = document.querySelector('.loader-container');
-const errorMessage = document.getElementById('error-message');
-const noResults = document.getElementById('no-results');
-const resultsContainer = document.getElementById('results');
+document.addEventListener("DOMContentLoaded", () => {
+  // DOM Elements
+  const themeToggle = document.getElementById("theme-toggle")
+  const languageToggle = document.getElementById("language-toggle")
+  const fetchBtn = document.getElementById("fetch-btn")
+  const siteUrlInput = document.getElementById("site-url")
+  const usersContainer = document.getElementById("users-container")
+  const userCount = document.getElementById("user-count")
+  const loadingContainer = document.querySelector(".loading-container")
+  const errorContainer = document.querySelector(".error-container")
+  const errorMessage = document.getElementById("error-message")
+  const errorDismiss = document.getElementById("error-dismiss")
+  const resultsContainer = document.querySelector(".results-container")
+  const gridViewBtn = document.getElementById("grid-view")
+  const listViewBtn = document.getElementById("list-view")
+  const userModal = document.querySelector(".user-modal")
+  const modalContent = document.querySelector(".modal-content")
+  const modalClose = document.querySelector(".modal-close")
+  const modalBody = document.querySelector(".modal-body")
 
-// Language translations
-const translations = {
-  en: {
-    title: 'WordPress User Extractor',
-    subtitle: 'Extract user information from WordPress sites via the REST API',
-    urlLabel: 'WordPress Site URL',
-    toggleLang: 'فارسی',
-    darkMode: 'Dark Mode',
-    lightMode: 'Light Mode',
-    extractUsers: 'Extract Users',
-    enterURL: 'Enter WordPress site URL (e.g. https://example.com)',
-    loading: 'Loading...',
-    error: 'Error fetching data. Please check the URL and try again.',
-    networkError: 'Network error. Please check your connection and try again.',
-    noUsers: 'No users found for this WordPress site.',
-    invalidURL: 'Please enter a valid URL',
-    emptyTitle: 'Ready to Extract Users',
-    emptyDescription: 'Enter a WordPress site URL above and click "Extract Users" to fetch user information.',
-    id: 'ID',
-    name: 'Name',
-    username: 'Username',
-    role: 'Role',
-    registered: 'Registered',
-    url: 'Website',
-    description: 'Description'
-  },
-  fa: {
-    title: 'استخراج کننده کاربران وردپرس',
-    subtitle: 'استخراج اطلاعات کاربران از سایت‌های وردپرسی از طریق REST API',
-    urlLabel: 'آدرس سایت وردپرسی',
-    toggleLang: 'English',
-    darkMode: 'حالت تاریک',
-    lightMode: 'حالت روشن',
-    extractUsers: 'استخراج کاربران',
-    enterURL: 'آدرس سایت وردپرسی را وارد کنید (مثلا https://example.com)',
-    loading: 'در حال بارگذاری...',
-    error: 'خطا در دریافت اطلاعات. لطفا آدرس را بررسی کرده و دوباره تلاش کنید.',
-    networkError: 'خطای شبکه. لطفا اتصال خود را بررسی کرده و دوباره تلاش کنید.',
-    noUsers: 'کاربری برای این سایت وردپرسی یافت نشد.',
-    invalidURL: 'لطفا یک آدرس معتبر وارد کنید',
-    emptyTitle: 'آماده استخراج کاربران',
-    emptyDescription: 'آدرس سایت وردپرسی را در بالا وارد کنید و روی «استخراج کاربران» کلیک کنید تا اطلاعات کاربران را دریافت کنید.',
-    id: 'شناسه',
-    name: 'نام',
-    username: 'نام کاربری',
-    role: 'نقش',
-    registered: 'تاریخ ثبت نام',
-    url: 'وب‌سایت',
-    description: 'توضیحات'
-  }
-};
+  // State
+  let currentLanguage = "en"
+  let isDarkMode = false
+  let currentView = "grid"
+  let usersData = []
 
-// App state
-let currentLang = 'en';
-let isDarkMode = false;
+  // Initialize
+  initTheme()
+  initLanguage()
+  addEventListeners()
 
-// Functions
-function toggleTheme() {
-  isDarkMode = !isDarkMode;
-  document.body.classList.toggle('dark', isDarkMode);
-  localStorage.setItem('darkMode', isDarkMode);
-  updateUI();
-}
-
-function toggleLanguage() {
-  currentLang = currentLang === 'en' ? 'fa' : 'en';
-  document.documentElement.lang = currentLang;
-  document.body.style.direction = currentLang === 'fa' ? 'rtl' : 'ltr';
-  document.body.setAttribute('dir', currentLang === 'fa' ? 'rtl' : 'ltr');
-  localStorage.setItem('language', currentLang);
-  updateUI();
-}
-
-function updateUI() {
-  const t = translations[currentLang];
-  
-  // Update text content
-  titleElement.textContent = t.title;
-  subtitleElement.textContent = t.subtitle;
-  urlLabelElement.textContent = t.urlLabel;
-  langText.textContent = t.toggleLang;
-  themeText.textContent = isDarkMode ? t.lightMode : t.darkMode;
-  extractBtn.querySelector('span').textContent = t.extractUsers;
-  siteUrlInput.placeholder = t.enterURL;
-  noResults.textContent = t.noUsers;
-  emptyTitleElement.textContent = t.emptyTitle;
-  emptyDescriptionElement.textContent = t.emptyDescription;
-  
-  // If there are results, refresh them with the current language
-  if (resultsContainer.children.length > 0) {
-    const cachedData = JSON.parse(localStorage.getItem('wpUserData'));
-    if (cachedData) {
-      displayResults(cachedData);
+  // Functions
+  function initTheme() {
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem("theme")
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark-mode")
+      themeToggle.innerHTML = '<i class="fas fa-sun"></i>'
+      isDarkMode = true
     }
   }
-}
 
-function resetUI() {
-  initialState.style.display = 'block';
-  errorMessage.style.display = 'none';
-  noResults.style.display = 'none';
-  resultsContainer.innerHTML = '';
-  loaderContainer.style.display = 'none';
-}
-
-async function extractUsers() {
-  const siteUrl = siteUrlInput.value.trim();
-  
-  // Validate URL
-  if (!siteUrl) {
-    showError(translations[currentLang].invalidURL);
-    return;
-  }
-  
-  // Format URL
-  let formattedUrl = siteUrl;
-  if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
-    formattedUrl = 'https://' + formattedUrl;
-  }
-  
-  // Remove trailing slash if present
-  if (formattedUrl.endsWith('/')) {
-    formattedUrl = formattedUrl.slice(0, -1);
-  }
-  
-  // Show loader
-  initialState.style.display = 'none';
-  loaderContainer.style.display = 'flex';
-  loader.style.display = 'block';
-  errorMessage.style.display = 'none';
-  noResults.style.display = 'none';
-  resultsContainer.innerHTML = '';
-  
-  try {
-    const response = await fetch(`${formattedUrl}/wp-json/wp/v2/users/`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+  function initLanguage() {
+    // Check for saved language preference
+    const savedLanguage = localStorage.getItem("language")
+    if (savedLanguage === "fa") {
+      setLanguage("fa")
     }
-    
-    const data = await response.json();
-    
-    // Cache the data
-    localStorage.setItem('wpUserData', JSON.stringify(data));
-    
-    // Display results
-    displayResults(data);
-  } catch (error) {
-    showError(error.message.includes('fetch') 
-      ? translations[currentLang].networkError 
-      : translations[currentLang].error);
-  } finally {
-    loaderContainer.style.display = 'none';
-    loader.style.display = 'none';
   }
-}
 
-function displayResults(users) {
-  resultsContainer.innerHTML = '';
-  
-  if (!users || users.length === 0) {
-    noResults.style.display = 'block';
-    return;
+  function addEventListeners() {
+    // Theme toggle
+    themeToggle.addEventListener("click", toggleTheme)
+
+    // Language toggle
+    languageToggle.addEventListener("click", toggleLanguage)
+
+    // Fetch button
+    fetchBtn.addEventListener("click", fetchUsers)
+
+    // Enter key in input
+    siteUrlInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        fetchUsers()
+      }
+    })
+
+    // Error dismiss button
+    errorDismiss.addEventListener("click", () => {
+      errorContainer.style.display = "none"
+    })
+
+    // View toggle buttons
+    gridViewBtn.addEventListener("click", () => {
+      setView("grid")
+    })
+
+    listViewBtn.addEventListener("click", () => {
+      setView("list")
+    })
+
+    // Modal close button
+    modalClose.addEventListener("click", closeModal)
+
+    // Close modal when clicking outside content
+    userModal.addEventListener("click", (e) => {
+      if (e.target === userModal) {
+        closeModal()
+      }
+    })
+
+    // Escape key to close modal
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && userModal.classList.contains("active")) {
+        closeModal()
+      }
+    })
   }
-  
-  const t = translations[currentLang];
-  
-  users.forEach(user => {
-    const userCard = document.createElement('div');
-    userCard.className = 'user-card';
-    
-    // Set avatar image or fallback
-    let avatarUrl = user.avatar_urls ? 
-      (user.avatar_urls['96'] || user.avatar_urls['48'] || user.avatar_urls['24']) : 
-      'https://secure.gravatar.com/avatar/?s=96&d=mm&r=g';
-    
-    userCard.innerHTML = `
+
+  function toggleTheme() {
+    isDarkMode = !isDarkMode
+    document.body.classList.toggle("dark-mode")
+
+    if (isDarkMode) {
+      themeToggle.innerHTML = '<i class="fas fa-sun"></i>'
+      localStorage.setItem("theme", "dark")
+    } else {
+      themeToggle.innerHTML = '<i class="fas fa-moon"></i>'
+      localStorage.setItem("theme", "light")
+    }
+  }
+
+  function toggleLanguage() {
+    const newLanguage = currentLanguage === "en" ? "fa" : "en"
+    setLanguage(newLanguage)
+  }
+
+  function setLanguage(language) {
+    currentLanguage = language
+    document.body.classList.toggle("fa", language === "fa")
+
+    // Update language toggle button text
+    const langToggleText = languageToggle.querySelector("span")
+    langToggleText.textContent = language === "en" ? "فارسی" : "English"
+
+    // Update all translatable elements
+    document.querySelectorAll("[data-en]").forEach((el) => {
+      el.textContent = el.getAttribute(`data-${language}`)
+    })
+
+    // Update input placeholders
+    document.querySelectorAll("input[data-en-placeholder]").forEach((input) => {
+      input.placeholder = input.getAttribute(`data-${language}-placeholder`)
+    })
+
+    localStorage.setItem("language", language)
+  }
+
+  function setView(view) {
+    currentView = view
+
+    if (view === "grid") {
+      usersContainer.className = "users-grid"
+      gridViewBtn.classList.add("active")
+      listViewBtn.classList.remove("active")
+    } else {
+      usersContainer.className = "users-list"
+      listViewBtn.classList.add("active")
+      gridViewBtn.classList.remove("active")
+    }
+
+    // Rerender users with new view
+    if (usersData.length > 0) {
+      displayUsers(usersData)
+    }
+  }
+
+  async function fetchUsers() {
+    const siteUrl = siteUrlInput.value.trim()
+
+    if (!siteUrl) {
+      showError(currentLanguage === "en" ? "Please enter a WordPress site URL" : "لطفا آدرس سایت وردپرس را وارد کنید")
+      return
+    }
+
+    // Format URL
+    let formattedUrl = siteUrl
+    if (!formattedUrl.startsWith("http")) {
+      formattedUrl = "https://" + formattedUrl
+    }
+
+    // Remove trailing slash if present
+    if (formattedUrl.endsWith("/")) {
+      formattedUrl = formattedUrl.slice(0, -1)
+    }
+
+    // Add API endpoint
+    const apiUrl = `${formattedUrl}/wp-json/wp/v2/users`
+
+    // Show loading
+    showLoading()
+
+    try {
+      const response = await fetch(apiUrl)
+
+      if (!response.ok) {
+        throw new Error(
+          currentLanguage === "en"
+            ? `Failed to fetch users (Status: ${response.status})`
+            : `خطا در دریافت کاربران (وضعیت: ${response.status})`,
+        )
+      }
+
+      const users = await response.json()
+
+      if (!Array.isArray(users) || users.length === 0) {
+        throw new Error(
+          currentLanguage === "en"
+            ? "No users found or invalid response format"
+            : "هیچ کاربری یافت نشد یا فرمت پاسخ نامعتبر است",
+        )
+      }
+
+      // Store users data
+      usersData = users
+
+      // Display users
+      displayUsers(users)
+    } catch (error) {
+      showError(error.message)
+    } finally {
+      hideLoading()
+    }
+  }
+
+  function displayUsers(users) {
+    // Clear previous results
+    usersContainer.innerHTML = ""
+
+    // Update user count
+    userCount.textContent = users.length
+
+    // Create user cards
+    users.forEach((user) => {
+      const userCard = createUserCard(user)
+      usersContainer.appendChild(userCard)
+    })
+
+    // Show results container with animation
+    resultsContainer.style.display = "block"
+    errorContainer.style.display = "none"
+
+    // Add animation class to each card with delay
+    const cards = usersContainer.querySelectorAll(".user-card")
+    cards.forEach((card, index) => {
+      setTimeout(() => {
+        card.style.opacity = "1"
+        card.style.transform = "translateY(0)"
+      }, 50 * index)
+    })
+  }
+
+  function createUserCard(user) {
+    const card = document.createElement("div")
+    card.className = `user-card ${currentView === "list" ? "list-view" : ""}`
+    card.style.opacity = "0"
+    card.style.transform = "translateY(20px)"
+    card.style.transition = "opacity 0.3s ease, transform 0.3s ease"
+
+    // Get avatar URL (use largest available)
+    const avatarUrl =
+      user.avatar_urls && user.avatar_urls["96"] ? user.avatar_urls["96"] : "/placeholder.svg?height=96&width=96"
+
+    // User header with avatar and name
+    const userHeader = `
       <div class="user-header">
-        <img class="user-avatar" src="${avatarUrl}" alt="${user.name || 'User'}">
-        <div>
-          <h3 class="user-name">${user.name || 'Unknown'}</h3>
-          <div class="user-username">@${user.slug || user.name?.toLowerCase().replace(/\s+/g, '') || 'user'}</div>
+        <div class="user-avatar">
+          <img src="${avatarUrl}" alt="${user.name || "User"}" />
+        </div>
+        <div class="user-info">
+          <h3 class="user-name">${user.name || "Unknown User"}</h3>
+          <div class="user-slug">${user.slug || ""}</div>
         </div>
       </div>
-      
-      <div class="user-meta">
-        <div class="meta-label">${t.id}:</div>
-        <div class="meta-value">${user.id}</div>
+    `
+
+    // User details - limit to 2 items in card view
+    const userDetails = `
+      <div class="user-details">
+        ${
+          user.id
+            ? `
+          <div class="detail-item">
+            <div class="detail-label">${currentLanguage === "en" ? "ID" : "شناسه"}</div>
+            <div class="detail-value">${user.id}</div>
+          </div>
+        `
+            : ""
+        }
         
-        ${user.url ? `
-        <div class="meta-label">${t.url}:</div>
-        <div class="meta-value"><a href="${user.url}" target="_blank" rel="noopener">${user.url.replace(/^https?:\/\//, '')}</a></div>
-        ` : ''}
-        
-        ${user.registered_date ? `
-        <div class="meta-label">${t.registered}:</div>
-        <div class="meta-value">${new Date(user.registered_date).toLocaleDateString(currentLang === 'fa' ? 'fa-IR' : undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        })}</div>
-        ` : ''}
+        ${
+          user.url
+            ? `
+          <div class="detail-item">
+            <div class="detail-label">${currentLanguage === "en" ? "URL" : "آدرس"}</div>
+            <div class="detail-value">
+              <a href="${user.url}" target="_blank" rel="noopener noreferrer">${user.url}</a>
+            </div>
+          </div>
+        `
+            : ""
+        }
+      </div>
+    `
+
+    // Combine all sections
+    card.innerHTML = userHeader + userDetails
+
+    // Add click event to open modal with full details
+    card.addEventListener("click", () => {
+      openUserModal(user)
+    })
+
+    return card
+  }
+
+  function openUserModal(user) {
+    // Get avatar URL (use largest available)
+    const avatarUrl =
+      user.avatar_urls && user.avatar_urls["96"] ? user.avatar_urls["96"] : "/placeholder.svg?height=96&width=96"
+
+    // Create modal content
+    const modalContent = `
+      <div class="modal-header">
+        <div class="user-avatar">
+          <img src="${avatarUrl}" alt="${user.name || "User"}" />
+        </div>
+        <h2 class="user-name">${user.name || "Unknown User"}</h2>
+        <div class="user-slug">${user.slug || ""}</div>
       </div>
       
-      ${user.description ? `
-      <div class="user-description">${user.description}</div>
-      ` : ''}
-    `;
-    
-    resultsContainer.appendChild(userCard);
-  });
-}
+      <div class="modal-details">
+        ${
+          user.id
+            ? `
+          <div class="detail-item">
+            <div class="detail-label">${currentLanguage === "en" ? "ID" : "شناسه"}</div>
+            <div class="detail-value">${user.id}</div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          user.url
+            ? `
+          <div class="detail-item">
+            <div class="detail-label">${currentLanguage === "en" ? "URL" : "آدرس"}</div>
+            <div class="detail-value">
+              <a href="${user.url}" target="_blank" rel="noopener noreferrer">${user.url}</a>
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          user.link
+            ? `
+          <div class="detail-item">
+            <div class="detail-label">${currentLanguage === "en" ? "Profile Link" : "لینک پروفایل"}</div>
+            <div class="detail-value">
+              <a href="${user.link}" target="_blank" rel="noopener noreferrer">${user.link}</a>
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          user.description
+            ? `
+          <div class="detail-item">
+            <div class="detail-label">${currentLanguage === "en" ? "Description" : "توضیحات"}</div>
+            <div class="detail-value">${user.description}</div>
+          </div>
+        `
+            : ""
+        }
+      </div>
+      
+      ${
+        user.meta && Object.keys(user.meta).length > 0
+          ? `
+        <div class="modal-meta">
+          <h3 class="meta-title">${currentLanguage === "en" ? "Meta Data" : "متادیتا"}</h3>
+          <div class="meta-items">
+            ${Object.entries(user.meta)
+              .map(
+                ([key, value]) => `
+                <div class="meta-item">
+                  <div class="meta-key">${key}</div>
+                  <div class="meta-value">${JSON.stringify(value)}</div>
+                </div>
+              `,
+              )
+              .join("")}
+          </div>
+        </div>
+      `
+          : ""
+      }
+    `
 
-function showError(message) {
-  errorMessage.textContent = message;
-  errorMessage.style.display = 'block';
-  loaderContainer.style.display = 'none';
-  initialState.style.display = 'none';
-}
+    // Set modal content
+    modalBody.innerHTML = modalContent
 
-// Event listeners
-toggleThemeBtn.addEventListener('click', toggleTheme);
-toggleLangBtn.addEventListener('click', toggleLanguage);
-extractBtn.addEventListener('click', extractUsers);
-siteUrlInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    extractUsers();
+    // Show modal with animation
+    userModal.classList.add("active")
+    document.body.style.overflow = "hidden" // Prevent scrolling
   }
-});
 
-// Check for saved preferences
-if (localStorage.getItem('darkMode') === 'true') {
-  isDarkMode = true;
-  document.body.classList.add('dark');
-}
-
-if (localStorage.getItem('language') === 'fa') {
-  currentLang = 'fa';
-  document.documentElement.lang = 'fa';
-  document.body.style.direction = 'rtl';
-  document.body.setAttribute('dir', 'rtl');
-}
-
-// Initialize UI
-updateUI();
-
-// Check if we have cached data
-const cachedData = localStorage.getItem('wpUserData');
-if (cachedData) {
-  try {
-    const data = JSON.parse(cachedData);
-    initialState.style.display = 'none';
-    displayResults(data);
-  } catch (e) {
-    // If there's an error parsing the cached data, reset to initial state
-    localStorage.removeItem('wpUserData');
-    resetUI();
+  function closeModal() {
+    userModal.classList.remove("active")
+    document.body.style.overflow = "" // Restore scrolling
   }
-}
+
+  function showLoading() {
+    loadingContainer.style.display = "flex"
+    resultsContainer.style.display = "none"
+    errorContainer.style.display = "none"
+  }
+
+  function hideLoading() {
+    loadingContainer.style.display = "none"
+  }
+
+  function showError(message) {
+    errorMessage.textContent = message
+    errorContainer.style.display = "block"
+    resultsContainer.style.display = "none"
+  }
+})
+

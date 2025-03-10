@@ -3,692 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WordPress User Extractor</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-    :root {
-      --primary: #6366f1;
-      --primary-hover: #4f46e5;
-      --primary-light: rgba(99, 102, 241, 0.1);
-      --background: #ffffff;
-      --card-bg: #f9fafb;
-      --text: #111827;
-      --text-secondary: #4b5563;
-      --border: #e5e7eb;
-      --error: #ef4444;
-      --success: #10b981;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      --radius: 0.5rem;
-    }
-
-    .dark {
-      --primary: #818cf8;
-      --primary-hover: #6366f1;
-      --primary-light: rgba(129, 140, 248, 0.1);
-      --background: #0f172a;
-      --card-bg: #1e293b;
-      --text: #f1f5f9;
-      --text-secondary: #cbd5e1;
-      --border: #334155;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.2s;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background-color: var(--background);
-      color: var(--text);
-      line-height: 1.6;
-      min-height: 100vh;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(var(--primary-rgb, 99, 102, 241), 0.05) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(var(--primary-rgb, 99, 102, 241), 0.05) 0px, transparent 50%);
-    }
-
-    .dark body {
-      --primary-rgb: 129, 140, 248;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 3rem;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-    }
-
-    .logo-container {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .logo {
-      width: 48px;
-      height: 48px;
-      background-color: var(--primary);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      font-size: 1.5rem;
-      box-shadow: var(--shadow);
-    }
-
-    .title-container h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      background: linear-gradient(to right, var(--primary), #8b5cf6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-fill-color: transparent;
-    }
-
-    .subtitle {
-      color: var(--text-secondary);
-      font-size: 1.1rem;
-      max-width: 600px;
-    }
-
-    .controls {
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    .btn {
-      padding: 0.625rem 1.25rem;
-      border-radius: var(--radius);
-      border: none;
-      cursor: pointer;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.9375rem;
-      transition: all 0.2s ease;
-    }
-
-    .btn-primary {
-      background-color: var(--primary);
-      color: white;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .btn-primary:hover {
-      background-color: var(--primary-hover);
-      box-shadow: var(--shadow);
-      transform: translateY(-1px);
-    }
-
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
-    .btn-outline {
-      background-color: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-
-    .btn-outline:hover {
-      background-color: var(--primary-light);
-      border-color: var(--primary);
-      color: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    .btn-outline:active {
-      transform: translateY(0);
-    }
-
-    .form-group {
-      margin-bottom: 2rem;
-      background-color: var(--card-bg);
-      padding: 2rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-    }
-
-    .form-label {
-      display: block;
-      margin-bottom: 0.75rem;
-      font-weight: 500;
-      color: var(--text);
-    }
-
-    .input-wrapper {
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    input[type="text"] {
-      flex: 1;
-      padding: 0.875rem 1.25rem;
-      border-radius: var(--radius);
-      border: 2px solid var(--border);
-      background-color: var(--background);
-      color: var(--text);
-      font-size: 1rem;
-      font-family: inherit;
-      box-shadow: var(--shadow-sm);
-    }
-
-    input[type="text"]:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-light);
-    }
-
-    .results {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-
-    .user-card {
-      background-color: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 1.75rem;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      transition: transform 0.2s, box-shadow 0.2s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .user-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .user-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(to right, var(--primary), #8b5cf6);
-    }
-
-    .user-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .user-avatar {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--background);
-      box-shadow: var(--shadow);
-    }
-
-    .user-name {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      color: var(--text);
-    }
-
-    .user-username {
-      color: var(--primary);
-      font-size: 0.9375rem;
-      font-weight: 500;
-    }
-
-    .user-meta {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0.5rem 1rem;
-      margin-bottom: 1.25rem;
-      font-size: 0.9375rem;
-    }
-
-    .meta-label {
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-
-    .meta-value {
-      color: var(--text);
-    }
-
-    .meta-value a {
-      color: var(--primary);
-      text-decoration: none;
-    }
-
-    .meta-value a:hover {
-      text-decoration: underline;
-    }
-
-    .user-description {
-      font-size: 0.9375rem;
-      line-height: 1.6;
-      color: var(--text-secondary);
-      border-top: 1px solid var(--border);
-      padding-top: 1rem;
-      margin-top: 0.5rem;
-    }
-
-    .loader-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 200px;
-    }
-
-    .loader {
-      display: none;
-      position: relative;
-      width: 60px;
-      height: 60px;
-    }
-
-    .loader::after,
-    .loader::before {
-      content: '';
-      position: absolute;
-      width: 48px;
-      height: 48px;
-      top: 0;
-      left: 0;
-      border-radius: 50%;
-      border: 4px solid transparent;
-      animation: loader 1.5s linear infinite;
-    }
-
-    .loader::after {
-      border-color: var(--primary);
-      animation-delay: 0.75s;
-    }
-
-    .loader::before {
-      border-top-color: var(--primary);
-    }
-
-    @keyframes loader {
-      0% {
-        transform: scale(0.8) rotate(0deg);
-        opacity: 1;
-      }
-      50% {
-        transform: scale(1) rotate(180deg);
-        opacity: 0.5;
-      }
-      100% {
-        transform: scale(0.8) rotate(360deg);
-        opacity: 1;
-      }
-    }
-
-    .message {
-      text-align: center;
-      padding: 2rem;
-      border-radius: var(--radius);
-      background-color: var(--card-bg);
-      border: 1px solid var(--border);
-      margin: 2rem 0;
-      display: none;
-    }
-
-    .error-message {
-      color: var(--error);
-      border-color: rgba(239, 68, 68, 0.2);
-      background-color: rgba(239, 68, 68, 0.05);
-    }
-
-    .no-results {
-      color: var(--text-secondary);
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 3rem 2rem;
-      border-radius: var(--radius);
-      background-color: var(--card-bg);
-      border: 1px dashed var(--border);
-      margin: 2rem 0;
-    }
-
-    .empty-state-icon {
-      font-size: 3rem;
-      color: var(--text-secondary);
-      margin-bottom: 1rem;
-      opacity: 0.5;
-    }
-
-    .empty-state-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-    }
-
-    .empty-state-description {
-      color: var(--text-secondary);
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
-    @media (max-width: 768px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      
-      .controls {
-        width: 100%;
-        justify-content: space-between;
-      }
-      
-      .form-group {
-        padding: 1.5rem;
-      }
-      
-      .input-wrapper {
-        flex-direction: column;
-      }
-      
-      .btn-primary {
-        width: 100%;
-        justify-content: center;
-      }
-      
-      .results {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* RTL Support */
-    [dir="rtl"] .user-card::before {
-      background: linear-gradient(to left, var(--primary), #8b5cf6);
-    }
-
-    [dir="rtl"] .title-container h1 {
-      background: linear-gradient(to left, var(--primary), #8b5cf6);
-      -webkit-background-clip: text;
-      background-clip: text;
-    }
-  </style>
+  <title>WPXtract</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-  <div class="container">
-    <header>
+<body class="light-mode">
+  <div class="app-container">
+    <div class="app-sidebar">
       <div class="logo-container">
         <div class="logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"></path>
-            <path d="M12 16v-4"></path>
-            <path d="M12 8h.01"></path>
-          </svg>
-        </div>
-        <div class="title-container">
-          <h1 id="title">WordPress User Extractor</h1>
-          <p class="subtitle" id="subtitle">Extract user information from WordPress sites via the REST API</p>
+          <i class="fas fa-code"></i>
+          <span class="logo-text" data-en="WPXtract" data-fa="WPXtract">WPXtract</span>
         </div>
       </div>
-      <div class="controls">
-        <button class="btn btn-outline" id="toggle-theme">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-          </svg>
-          <span id="theme-text">Dark Mode</span>
+      <div class="sidebar-controls">
+        <button id="theme-toggle" class="control-btn" aria-label="Toggle dark mode">
+          <i class="fas fa-moon"></i>
         </button>
-        <button class="btn btn-outline" id="toggle-lang">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m5 8 6 6"></path>
-            <path d="m4 14 6-6 2-3"></path>
-            <path d="M2 5h12"></path>
-            <path d="M7 2h1"></path>
-            <path d="m22 22-5-10-5 10"></path>
-            <path d="M14 18h6"></path>
-          </svg>
-          <span id="lang-text">فارسی</span>
+        <button id="language-toggle" class="control-btn" aria-label="Toggle language">
+          <span data-en="فارسی" data-fa="English">فارسی</span>
         </button>
       </div>
-    </header>
+    </div>
 
-    <main>
-      <div class="form-group">
-        <label for="site-url" class="form-label" id="url-label">WordPress Site URL</label>
-        <div class="input-wrapper">
-          <input type="text" id="site-url" placeholder="Enter WordPress site URL (e.g. https://example.com)">
-          <button class="btn btn-primary" id="extract-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.3-4.3"></path>
-            </svg>
-            <span>Extract Users</span>
+    <div class="app-main">
+      <header class="app-header">
+        <h1 class="app-title" data-en="WordPress User Explorer" data-fa="کاوشگر کاربران وردپرس">WordPress User Explorer</h1>
+        <p class="app-subtitle" data-en="Extract and analyze WordPress users data" data-fa="استخراج و تحلیل داده‌های کاربران وردپرس">Extract and analyze WordPress users data</p>
+      </header>
+
+      <div class="search-container">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input 
+            type="text" 
+            id="site-url" 
+            placeholder="Enter WordPress site URL" 
+            data-en-placeholder="Enter WordPress site URL" 
+            data-fa-placeholder="آدرس سایت وردپرس را وارد کنید"
+          >
+          <button id="fetch-btn" class="search-button" data-en="Extract" data-fa="استخراج">
+            Extract
           </button>
         </div>
+        <p class="search-hint" data-en="Example: https://example.com" data-fa="مثال: https://example.com">Example: https://example.com</p>
       </div>
 
-      <div id="initial-state" class="empty-state">
-        <div class="empty-state-icon">👥</div>
-        <h2 class="empty-state-title" id="empty-title">Ready to Extract Users</h2>
-        <p class="empty-state-description" id="empty-description">Enter a WordPress site URL above and click "Extract Users" to fetch user information.</p>
+      <div class="loading-container">
+        <div class="loading-animation">
+          <div class="loading-circle"></div>
+          <div class="loading-circle"></div>
+          <div class="loading-circle"></div>
+        </div>
+        <p class="loading-text" data-en="Fetching users data..." data-fa="در حال دریافت اطلاعات کاربران...">Fetching users data...</p>
       </div>
 
-      <div class="loader-container">
-        <div class="loader" id="loader"></div>
+      <div class="error-container">
+        <div class="error-icon">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <p id="error-message"></p>
+        <button id="error-dismiss" class="error-dismiss" data-en="Dismiss" data-fa="بستن">Dismiss</button>
       </div>
-      
-      <div class="message error-message" id="error-message"></div>
-      <div class="message no-results" id="no-results"></div>
-      
-      <div class="results" id="results"></div>
-    </main>
+
+      <div class="results-container">
+        <div class="results-header">
+          <div class="results-title">
+            <h2 data-en="Users Found" data-fa="کاربران یافت شده">Users Found</h2>
+            <div class="user-count-badge">
+              <span id="user-count">0</span>
+            </div>
+          </div>
+          <div class="view-controls">
+            <button id="grid-view" class="view-btn active" aria-label="Grid view">
+              <i class="fas fa-th-large"></i>
+            </button>
+            <button id="list-view" class="view-btn" aria-label="List view">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div id="users-container" class="users-grid">
+          <!-- User cards will be inserted here -->
+        </div>
+      </div>
+
+      <footer class="app-footer">
+        <p data-en="Add /wp-json/wp/v2/users to the end of a WordPress site URL to get user data" 
+           data-fa="برای دریافت اطلاعات کاربران، /wp-json/wp/v2/users را به انتهای آدرس سایت وردپرس اضافه کنید">
+          Add /wp-json/wp/v2/users to the end of a WordPress site URL to get user data
+        </p>
+      </footer>
+    </div>
   </div>
 
-  <script>
-    // DOM Elements
-    const toggleThemeBtn = document.getElementById('toggle-theme');
-    const toggleLangBtn = document.getElementById('toggle-lang');
-    const themeText = document.getElementById('theme-text');
-    const langText = document.getElementById('lang-text');
-    const titleElement = document.getElementById('title');
-    const subtitleElement = document.getElementById('subtitle');
-    const urlLabelElement = document.getElementById('url-label');
-    const emptyTitleElement = document.getElementById('empty-title');
-    const emptyDescriptionElement = document.getElementById('empty-description');
-    const siteUrlInput = document.getElementById('site-url');
-    const extractBtn = document.getElementById('extract-btn');
-    const initialState = document.getElementById('initial-state');
-    const loader = document.getElementById('loader');
-    const loaderContainer = document.querySelector('.loader-container');
-    const errorMessage = document.getElementById('error-message');
-    const noResults = document.getElementById('no-results');
-    const resultsContainer = document.getElementById('results');
+  <div class="user-modal">
+    <div class="modal-content">
+      <button class="modal-close">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="modal-body">
+        <!-- User details will be inserted here -->
+      </div>
+    </div>
+  </div>
 
-    // Language translations
-    const translations = {
-      en: {
-        title: 'WordPress User Extractor',
-        subtitle: 'Extract user information from WordPress sites via the REST API',
-        urlLabel: 'WordPress Site URL',
-        toggleLang: 'فارسی',
-        darkMode: 'Dark Mode',
-        lightMode: 'Light Mode',
-        extractUsers: 'Extract Users',
-        enterURL: 'Enter WordPress site URL (e.g. https://example.com)',
-        loading: 'Loading...',
-        error: 'Error fetching data. Please check the URL and try again.',
-        networkError: 'Network error. Please check your connection and try again.',
-        noUsers: 'No users found for this WordPress site.',
-        invalidURL: 'Please enter a valid URL',
-        emptyTitle: 'Ready to Extract Users',
-        emptyDescription: 'Enter a WordPress site URL above and click "Extract Users" to fetch user information.',
-        id: 'ID',
-        name: 'Name',
-        username: 'Username',
-        role: 'Role',
-        registered: 'Registered',
-        url: 'Website',
-        description: 'Description'
-      },
-      fa: {
-        title: 'استخراج کننده کاربران وردپرس',
-        subtitle: 'استخراج اطلاعات کاربران از سایت‌های وردپرسی از طریق REST API',
-        urlLabel: 'آدرس سایت وردپرسی',
-        toggleLang: 'English',
-        darkMode: 'حالت تاریک',
-        lightMode: 'حالت روشن',
-        extractUsers: 'استخراج کاربران',
-        enterURL: 'آدرس سایت وردپرسی را وارد کنید (مثلا https://example.com)',
-        loading: 'در حال بارگذاری...',
-        error: 'خطا در دریافت اطلاعات. لطفا آدرس را بررسی کرده و دوباره تلاش کنید.',
-        networkError: 'خطای شبکه. لطفا اتصال خود را بررسی کرده و دوباره تلاش کنید.',
-        noUsers: 'کاربری برای این سایت وردپرسی یافت نشد.',
-        invalidURL: 'لطفا یک آدرس معتبر وارد کنید',
-        emptyTitle: 'آماده استخراج کاربران',
-        emptyDescription: 'آدرس سایت وردپرسی را در بالا وارد کنید و روی «استخراج کاربران» کلیک کنید تا اطلاعات کاربران را دریافت کنید.',
-        id: 'شناسه',
-        name: 'نام',
-        username: 'نام کاربری',
-        role: 'نقش',
-        registered: 'تاریخ ثبت نام',
-        url: 'وب‌سایت',
-        description: 'توضیحات'
-      }
-    };
+  <script src="script.js"></script>
+</body>
+</html>
 
-    // App state
-    let currentLang = 'en';
-    let isDarkMode = false;
-
-    // Functions
-    function toggleTheme() {
-      isDarkMode = !isDarkMode;
-      document.body.classList.toggle('dark', isDarkMode);
-      localStorage.setItem('darkMode', isDarkMode);
-      updateUI();
-    }
-
-    function toggleLanguage() {
-      currentLang = currentLang === 'en' ? 'fa' : 'en';
-      document.documentElement.lang = currentLang;
-      document.body.style.direction = currentLang === 'fa' ? 'rtl' : 'ltr';
-      document.body.setAttribute('dir', currentLang === 'fa' ? 'rtl' : 'ltr');
-      localStorage.setItem('language', currentLang);
-      updateUI();
-    }
-
-    function updateUI() {
-      const t = translations[currentLang];
-      
-      // Update text content
-      titleElement.textContent = t.title;
-      subtitleElement.textContent = t.subtitle;
-      urlLabelElement.textContent = t.urlLabel;
-      langText.textContent = t.toggleLang;
-      themeText.textContent = isDarkMode ? t.lightMode : t.darkMode;
-      extractBtn.querySelector('span').textContent = t.extractUsers;
-      siteUrlInput.placeholder = t.enterURL;
-      noResults.textContent = t.noUsers;
-      emptyTitleElement.textContent = t.emptyTitle;
-      emptyDescriptionElement.textContent = t.emptyDescription;
-      
-      // If there are results, refresh them with the current language
-      if (resultsContainer.children.length > 0) {
-        const cachedData = JSON.parse(localStorage.getItem('wpUserData'));
-        if (cachedData) {
-          displayResults(cachedData);
-        }
-      }
-    }
-
-    function resetUI() {
-      initialState.style.display = 'block';
-      errorMessage.style.display = 'none';
-      noResults.style.display = 'none';
-      resultsContainer.innerHTML = '';
-      loaderContainer.style.display = 'none';
-    }
-
-    async function extractUsers() {
-      const siteUrl = siteUrlInput.value.trim();
-      
-      // Validate URL
-      if (!siteUrl) {
-        showError(translations[currentLang].invalidURL);
-        return;
-      }
-      
-      // Format URL
-      let formattedUrl = siteUrl;
-      if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
-        formattedUrl = 'https://' + formattedUrl;
-      }
-      
-      // Remove trailing slash if present
-      if (formattedUrl.endsWith('/')) {
-        formattedUrl = formattedUrl.slice(0, -1);
-      }
-      
-      // Show loader
-      initialState.style.display = 'none';
-      loaderContainer.style.display = 'flex';
-      loader.style.display = 'block';
-      errorMessage.style.display = 'none';
-      noResults.style.display = 'none';
-      resultsContainer.innerHTML = '';
-      
-      try {
-        const response = await fetch(`${formattedUrl}/wp-json/wp/v2/users/`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        // Cache the data
-        localStorage.setItem('wpUserData', JSON.stringify(data));
-        
-        // Display results
-        displayResults(data);
-      } catch (error) {
-        showError(error.message.includes('fetch') 
-          ? translations[currentLang].networkError 
-          : translations[currentLang].error);
-      } finally {
-        loaderContainer.style.display = 'none';
-        loader.style.display = 'none';
-      }
-    }
-
-    function displayResults(users) {
-      resultsContainer.innerHTML = '';
-      
-      if (!users || users.length === 0) {
-        noResults.style.display = 'block';
-      
